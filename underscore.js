@@ -1,5 +1,7 @@
 (function (global, factory) {
+  // ! 判断环境
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  // ! define 是啥
   typeof define === 'function' && define.amd ? define('underscore', factory) :
   (global = global || self, (function () {
     var current = global._;
@@ -13,32 +15,46 @@
   //     Underscore may be freely distributed under the MIT license.
 
   // Current version.
+  // ! 定义版本号
   var VERSION = '1.12.0';
 
   // Establish the root object, `window` (`self`) in the browser, `global`
   // on the server, or `this` in some virtual machines. We use `self`
   // instead of `window` for `WebWorker` support.
+  // ! 获取根
   var root = typeof self == 'object' && self.self === self && self ||
             typeof global == 'object' && global.global === global && global ||
             Function('return this')() ||
             {};
 
   // Save bytes in the minified (but not gzipped) version:
+  // ! 获取数组、对象、symbol的prototype
+  // ???? 缓存变量、便于压缩代码（压缩成min.js）
   var ArrayProto = Array.prototype, ObjProto = Object.prototype;
   var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
   // Create quick reference variables for speed access to core prototypes.
+
+  // ! 从预先定义好的变量中调用方法会更快？？？？？？？？
+  // ?????  减少在原型链中查找的次数
+  
   var push = ArrayProto.push,
       slice = ArrayProto.slice,
       toString = ObjProto.toString,
       hasOwnProperty = ObjProto.hasOwnProperty;
 
   // Modern feature detection.
+
+  //! 现代特点监听器
+
   var supportsArrayBuffer = typeof ArrayBuffer !== 'undefined',
       supportsDataView = typeof DataView !== 'undefined';
 
   // All **ECMAScript 5+** native function implementations that we hope to use
   // are declared here.
+
+  // ! 定义es5中的方法
+
   var nativeIsArray = Array.isArray,
       nativeKeys = Object.keys,
       nativeCreate = Object.create,
@@ -49,11 +65,18 @@
       _isFinite = isFinite;
 
   // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+
+  //! ie9 以下不支持 `for key in ...` 遍历
+  // ? 随便举一个例子
   var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
+
+  // ! 传递不可遍历的props数组 
   var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
     'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
 
   // The largest integer that can be represented exactly.
+
+  // ! ???????? 可以精确表示的最大整数
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 
   // Some functions take a variable number of arguments, or a few expected
@@ -61,8 +84,13 @@
   // on. This helper accumulates all remaining arguments past the function’s
   // argument length (or an explicit `startIndex`), into an array that becomes
   // the last argument. Similar to ES6’s "rest parameter".
+
+  // ! 剩余参数
+
   function restArguments(func, startIndex) {
+    // ! 开始索引
     startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    // ! 直接返回一个函数
     return function() {
       var length = Math.max(arguments.length - startIndex, 0),
           rest = Array(length),
@@ -85,6 +113,7 @@
   }
 
   // Is a given variable an object?
+  // ! 判断是否为对象（通过typeof 判断是否 函数、对象、字符串）
   function isObject(obj) {
     var type = typeof obj;
     return type === 'function' || type === 'object' && !!obj;
@@ -101,16 +130,22 @@
   }
 
   // Is a given value a boolean?
+  // ! boolean 判断限制在true、false以及toString上
   function isBoolean(obj) {
     return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   }
 
   // Is a given value a DOM element?
+  //! 判断是否 是元素（通过nodeType进行判断）
   function isElement(obj) {
     return !!(obj && obj.nodeType === 1);
   }
 
   // Internal function for creating a `toString`-based type tester.
+  
+  // !!!!!!
+  // ???? 为什么要创建这样一个东西去判断数据类型
+  
   function tagTester(name) {
     var tag = '[object ' + name + ']';
     return function(obj) {
@@ -136,6 +171,8 @@
 
   // Optimize `isFunction` if appropriate. Work around some `typeof` bugs in old
   // v8, IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  
+  // ! 兼容
   var nodelist = root.document && root.document.childNodes;
   if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
     isFunction = function(obj) {
@@ -150,6 +187,8 @@
   // In IE 10 - Edge 13, `DataView` has string tag `'[object Object]'`.
   // In IE 11, the most common among them, this problem also applies to
   // `Map`, `WeakMap` and `Set`.
+
+
   var hasStringTagBug = (
         supportsDataView && hasObjectTag(new DataView(new ArrayBuffer(8)))
       ),
@@ -170,6 +209,7 @@
   var isArray = nativeIsArray || tagTester('Array');
 
   // Internal function to check whether `key` is an own property name of `obj`.
+  // ! 对象中是否存在某个键
   function has(obj, key) {
     return obj != null && hasOwnProperty.call(obj, key);
   }
@@ -189,16 +229,19 @@
   var isArguments$1 = isArguments;
 
   // Is a given object a finite number?
+  //! 无限
   function isFinite$1(obj) {
     return !isSymbol(obj) && _isFinite(obj) && !isNaN(parseFloat(obj));
   }
 
   // Is the given value `NaN`?
+  // ! 非数字
   function isNaN$1(obj) {
     return isNumber(obj) && _isNaN(obj);
   }
 
   // Predicate-generating function. Often useful outside of Underscore.
+  // ! 常量
   function constant(value) {
     return function() {
       return value;
@@ -206,6 +249,7 @@
   }
 
   // Common internal logic for `isArrayLike` and `isBufferLike`.
+  // ! `isArrayLike` 和 `isBufferLike` 常用的内部逻辑
   function createSizePropertyCheck(getSizeProperty) {
     return function(collection) {
       var sizeProperty = getSizeProperty(collection);
@@ -214,6 +258,7 @@
   }
 
   // Internal helper to generate a function to obtain property `key` from `obj`.
+  // ! 内部帮助方法，返回一个用于获取对象中key对应的值的函数
   function shallowProperty(key) {
     return function(obj) {
       return obj == null ? void 0 : obj[key];
@@ -221,6 +266,7 @@
   }
 
   // Internal helper to obtain the `byteLength` property of an object.
+  // ! 获取字节长度
   var getByteLength = shallowProperty('byteLength');
 
   // Internal helper to determine whether we should spend extensive checks against
@@ -228,6 +274,8 @@
   var isBufferLike = createSizePropertyCheck(getByteLength);
 
   // Is a given value a typed array?
+  // ????
+  // !!!!!
   var typedArrayPattern = /\[object ((I|Ui)nt(8|16|32)|Float(32|64)|Uint8Clamped|Big(I|Ui)nt64)Array\]/;
   function isTypedArray(obj) {
     // `ArrayBuffer.isView` is the most future-proof, so use it when available.
@@ -245,9 +293,12 @@
   // `collectNonEnumProps` used to depend on `_.contains`, but this led to
   // circular imports. `emulatedSet` is a one-off solution that only works for
   // arrays of strings.
+
+  // ! 仿真set格式
   function emulatedSet(keys) {
     var hash = {};
     for (var l = keys.length, i = 0; i < l; ++i) hash[keys[i]] = true;
+    // ! 采用闭包形式，将数据存储在内部
     return {
       contains: function(key) { return hash[key]; },
       push: function(key) {
@@ -260,6 +311,8 @@
   // Internal helper. Checks `keys` for the presence of keys in IE < 9 that won't
   // be iterated by `for key in ...` and thus missed. Extends `keys` in place if
   // needed.
+
+  //! ie9以下 获取对象中的所有keys
   function collectNonEnumProps(obj, keys) {
     keys = emulatedSet(keys);
     var nonEnumIdx = nonEnumerableProps.length;
@@ -280,6 +333,8 @@
 
   // Retrieve the names of an object's own properties.
   // Delegates to **ECMAScript 5**'s native `Object.keys`.
+
+  // ! 集成es5的Object.keys方法
   function keys(obj) {
     if (!isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
@@ -292,10 +347,13 @@
 
   // Is a given array, string, or object empty?
   // An "empty" object has no enumerable own-properties.
+
+  // ! 判断是否为空
   function isEmpty(obj) {
     if (obj == null) return true;
     // Skip the more expensive `toString`-based type checks if `obj` has no
     // `.length`.
+    // ! 如果不存在.length属性就跳过toString方法
     var length = getLength(obj);
     if (typeof length == 'number' && (
       isArray(obj) || isString(obj) || isArguments$1(obj)
@@ -304,6 +362,9 @@
   }
 
   // Returns whether an object has a given set of `key:value` pairs.
+  // ! 返回一个对象是否含有一个 key:value 集合
+  // ??? 有必要这样循环判断嘛？？？？？？？？
+
   function isMatch(object, attrs) {
     var _keys = keys(attrs), length = _keys.length;
     if (object == null) return !length;
@@ -318,6 +379,7 @@
   // If Underscore is called as a function, it returns a wrapped object that can
   // be used OO-style. This wrapper holds altered versions of all functions added
   // through `_.mixin`. Wrapped objects may be chained.
+  // ! 函数式编程以及面向对象编程
   function _(obj) {
     if (obj instanceof _) return obj;
     if (!(this instanceof _)) return new _(obj);
@@ -353,15 +415,18 @@
   var tagDataView = '[object DataView]';
 
   // Internal recursive comparison function for `_.isEqual`.
+  // ! 判断是否相等
   function eq(a, b, aStack, bStack) {
     // Identical objects are equal. `0 === -0`, but they aren't identical.
     // See the [Harmony `egal` proposal](https://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    // ! 0 跟 -0 也要区别
     if (a === b) return a !== 0 || 1 / a === 1 / b;
     // `null` or `undefined` only equal to itself (strict comparison).
     if (a == null || b == null) return false;
     // `NaN`s are equivalent, but non-reflexive.
     if (a !== a) return b !== b;
     // Exhaust primitive checks
+    // ! 获取a的类型 
     var type = typeof a;
     if (type !== 'function' && type !== 'object' && typeof b != 'object') return false;
     return deepEq(a, b, aStack, bStack);
@@ -370,10 +435,12 @@
   // Internal recursive comparison function for `_.isEqual`.
   function deepEq(a, b, aStack, bStack) {
     // Unwrap any wrapped objects.
+    // ! 怎么判断这些东西
     if (a instanceof _) a = a._wrapped;
     if (b instanceof _) b = b._wrapped;
     // Compare `[[Class]]` names.
     var className = toString.call(a);
+    // ! 根据两个值的类型进行判断
     if (className !== toString.call(b)) return false;
     // Work around a bug in IE 10 - Edge 13.
     if (hasStringTagBug && className == '[object Object]' && isDataView$1(a)) {
@@ -530,6 +597,7 @@
   var isWeakSet = tagTester('WeakSet');
 
   // Retrieve the values of an object's properties.
+  // ! 检索对象中的所有值
   function values(obj) {
     var _keys = keys(obj);
     var length = _keys.length;
@@ -542,6 +610,7 @@
 
   // Convert an object into a list of `[key, value]` pairs.
   // The opposite of `_.object` with one argument.
+  // ! 保存 [key, value] 格式
   function pairs(obj) {
     var _keys = keys(obj);
     var length = _keys.length;
@@ -553,6 +622,7 @@
   }
 
   // Invert the keys and values of an object. The values must be serializable.
+  // ! 键值对位置倒置
   function invert(obj) {
     var result = {};
     var _keys = keys(obj);
@@ -563,6 +633,7 @@
   }
 
   // Return a sorted list of the function names available on the object.
+  // ! 保存对象中值为函数的键名
   function functions(obj) {
     var names = [];
     for (var key in obj) {
@@ -572,6 +643,7 @@
   }
 
   // An internal function for creating assigner functions.
+  // TODO
   function createAssigner(keysFunc, defaults) {
     return function(obj) {
       var length = arguments.length;
@@ -591,28 +663,34 @@
   }
 
   // Extend a given object with all the properties in passed-in object(s).
+  // ! 扩展方法
   var extend = createAssigner(allKeys);
 
   // Assigns a given object with all the own properties in the passed-in
   // object(s).
   // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
+  // TODO
   var extendOwn = createAssigner(keys);
 
   // Fill in a given object with default properties.
+  // TODO
   var defaults = createAssigner(allKeys, true);
 
   // Create a naked function reference for surrogate-prototype-swapping.
+  // ! 创建一个空的构造函数
   function ctor() {
     return function(){};
   }
 
   // An internal function for creating a new object that inherits from another.
+  // ! 创建一个继承于另一个对象的对象
   function baseCreate(prototype) {
     if (!isObject(prototype)) return {};
     if (nativeCreate) return nativeCreate(prototype);
     var Ctor = ctor();
     Ctor.prototype = prototype;
     var result = new Ctor;
+    // ! 清除缓存
     Ctor.prototype = null;
     return result;
   }
@@ -620,6 +698,7 @@
   // Creates an object that inherits from the given prototype object.
   // If additional properties are provided then they will be added to the
   // created object.
+  // ! 创建一个继承于另一个对象的对象
   function create(prototype, props) {
     var result = baseCreate(prototype);
     if (props) extendOwn(result, props);
@@ -627,6 +706,7 @@
   }
 
   // Create a (shallow-cloned) duplicate of an object.
+  // ! 克隆
   function clone(obj) {
     if (!isObject(obj)) return obj;
     return isArray(obj) ? obj.slice() : extend({}, obj);
@@ -635,6 +715,7 @@
   // Invokes `interceptor` with the `obj` and then returns `obj`.
   // The primary purpose of this method is to "tap into" a method chain, in
   // order to perform operations on intermediate results within the chain.
+  // TODO
   function tap(obj, interceptor) {
     interceptor(obj);
     return obj;
@@ -642,6 +723,7 @@
 
   // Normalize a (deep) property `path` to array.
   // Like `_.iteratee`, this function can be customized.
+  // ! 标准化path 成 数组格式
   function toPath(path) {
     return isArray(path) ? path : [path];
   }
@@ -654,6 +736,7 @@
   }
 
   // Internal function to obtain a nested property in `obj` along `path`.
+  // TODO
   function deepGet(obj, path) {
     var length = path.length;
     for (var i = 0; i < length; i++) {
@@ -667,6 +750,7 @@
   // If any property in `path` does not exist or if the value is
   // `undefined`, return `defaultValue` instead.
   // The `path` is normalized through `_.toPath`.
+  // TODO
   function get(object, path, defaultValue) {
     var value = deepGet(object, toPath$1(path));
     return isUndefined(value) ? defaultValue : value;
@@ -675,6 +759,7 @@
   // Shortcut function for checking if an object has a given property directly on
   // itself (in other words, not on a prototype). Unlike the internal `has`
   // function, this public version can also traverse nested properties.
+  // TODO
   function has$1(obj, path) {
     path = toPath$1(path);
     var length = path.length;
@@ -687,12 +772,14 @@
   }
 
   // Keep the identity function around for default iteratees.
+  // ! 用于默认遍历？？？？？？
   function identity(value) {
     return value;
   }
 
   // Returns a predicate for checking whether an object has a given set of
   // `key:value` pairs.
+  // ! 返回一个函数用于匹配对象是否式key：value格式
   function matcher(attrs) {
     attrs = extendOwn({}, attrs);
     return function(obj) {
@@ -702,6 +789,7 @@
 
   // Creates a function that, when passed an object, will traverse that object’s
   // properties down the given `path`, specified as an array of keys or indices.
+  // TODO
   function property(path) {
     path = toPath$1(path);
     return function(obj) {
@@ -712,6 +800,7 @@
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
   // functions.
+  // ! 优化回调
   function optimizeCb(func, context, argCount) {
     if (context === void 0) return func;
     switch (argCount == null ? 3 : argCount) {
